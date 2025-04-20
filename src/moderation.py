@@ -1,10 +1,8 @@
+from src.models import Comment
 import google.generativeai as genai
 import os
-from dotenv import load_dotenv
-from src.models import Comment # Import Comment class for type hinting
 
 # Laad de API-sleutel uit het .env bestand
-load_dotenv()
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
 if not API_KEY:

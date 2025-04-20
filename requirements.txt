@@ -1,4 +1,6 @@
 google-generativeai
-python-dotenv
 Flask
-Werkzeug 
+Werkzeug
+gunicorn # Productie WSGI server
+
+# python-dotenv # Verwijderd, niet nodig op Render 

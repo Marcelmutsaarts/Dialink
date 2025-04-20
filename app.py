@@ -1,18 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import os
-from dotenv import load_dotenv
-from src.models import Post, Comment, User # We halen nu modellen uit src
-from src.moderation import moderate_comment # En de moderatiefunctie
-import datetime
 import re # Nodig voor nl2br
 from markupsafe import Markup # Correcte import voor Markup
 from werkzeug.utils import secure_filename # Nodig voor veilige bestandsnamen
 import uuid # Nodig voor unieke bestandsnamen
 import json
 from functools import wraps # Voor login_required decorator
-
-# Laad environment variabelen (voor API sleutel)
-load_dotenv()
+from src.models import Post, Comment, User # We halen nu modellen uit src
+from src.moderation import moderate_comment # En de moderatiefunctie
+import datetime
 
 app = Flask(__name__, template_folder='templates') # Explicitly set template folder
 app.config['TEMPLATES_AUTO_RELOAD'] = True # Force template reloading
