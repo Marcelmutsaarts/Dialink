@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dialink{% endblock %}</title> {# Paginatitel aanpasbaar #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #4f46e5; /* Indigo */
+            --brand-primary-dark: #4338ca;
+            --brand-primary-light: #e0e7ff;
+            --brand-highlight: #f97316; /* Oranje */
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --border-light: #e2e8f0;
+            --border-dark: #cbd5e1;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --rounded-lg: 16px;
+            --rounded-md: 12px;
+            --rounded-sm: 8px;
+            --alert-success: #dcfce7; --alert-success-text: #166534;
+            --alert-danger: #fee2e2;  --alert-danger-text: #991b1b;
+            --alert-warning: #ffedd5; --alert-warning-text: #9a3412;
+            --alert-info: #e0f2fe;   --alert-info-text: #0c4a6e;
+        }
+        /* Reset & base styles ... (kopieer van index.html of laat staan als het daar al goed is) ... */
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; font-size: 16px; margin: 0; }
+        .app-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; padding: 20px 0; border-bottom: 1px solid var(--border-light);}
+        .logo-link { display: flex; align-items: center; text-decoration: none; }
+        .app-logo { height: 50px; /* Kleinere logo in header */ }
+        .nav { display: flex; align-items: center; gap: 16px; }
+        .nav a, .nav span { text-decoration: none; color: var(--text-muted); font-weight: 500; }
+        .nav a:hover { color: var(--text-dark); }
+        .nav .logout-btn { background: none; border: none; color: var(--text-muted); font-weight: 500; cursor: pointer; font-size: inherit; font-family: inherit; padding: 0;}
+        .nav .logout-btn:hover { color: var(--text-dark); }
+        /* Flash message styles */
+        .flash-messages { list-style: none; padding: 0; margin: 0 0 20px 0; }
+        .flash-messages li { padding: 15px 20px; margin-bottom: 10px; border-radius: var(--rounded-sm); font-weight: 500; border: 1px solid transparent; }
+        .flash-success { background-color: var(--alert-success); color: var(--alert-success-text); border-color: var(--alert-success-text); }
+        .flash-danger { background-color: var(--alert-danger); color: var(--alert-danger-text); border-color: var(--alert-danger-text); }
+        .flash-warning { background-color: var(--alert-warning); color: var(--alert-warning-text); border-color: var(--alert-warning-text); }
+        .flash-info { background-color: var(--alert-info); color: var(--alert-info-text); border-color: var(--alert-info-text); }
+        /* Card styles (kopieer van index.html of definieer hier centraal) */
+        .card { background-color: var(--bg-white); border-radius: var(--rounded-lg); box-shadow: var(--shadow-md); margin-bottom: 32px; overflow: hidden; border: 1px solid var(--border-light); }
+        .card-header { padding: 24px 32px; border-bottom: 1px solid var(--border-light); }
+        .card-content { padding: 32px; }
+        .card-footer { padding: 24px 32px; background-color: var(--bg-light); border-top: 1px solid var(--border-light); }
+        /* Auth card & form styles */
+        .auth-card { max-width: 450px; margin: 40px auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-dark); }
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 14px 16px; border: 1px solid var(--border-dark); border-radius: var(--rounded-md); font-family: inherit; font-size: 1rem; transition: all 0.2s ease; color: var(--text-dark); }
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+        button { background-color: var(--brand-primary); color: white; border: none; padding: 12px 24px; font-weight: 500; border-radius: var(--rounded-md); cursor: pointer; transition: background-color 0.2s ease; font-size: 1rem; box-shadow: var(--shadow-sm); width: 100%; }
+        button:hover { background-color: var(--brand-primary-dark); box-shadow: var(--shadow-md); }
+        .auth-switch { text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 0.9rem; }
+        .auth-switch a { color: var(--brand-primary); text-decoration: none; font-weight: 500; }
+        .auth-switch a:hover { text-decoration: underline; }
+         /* ... (Andere stijlen van index.html die globaal moeten zijn) ... */
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="{{ url_for('index') }}" class="logo-link">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Dialink logo" class="app-logo">
+            </a>
+            <nav class="nav">
+                {% if current_user %}
+                    <span>Welkom, {{ current_user.username }}!</span>
+                    <form action="{{ url_for('logout') }}" method="post" style="display: inline;">
+                         <button type="submit" class="logout-btn">Uitloggen</button>
+                     </form>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Inloggen</a>
+                    <a href="{{ url_for('register') }}">Registreren</a>
+                {% endif %}
+            </nav>
+        </header>
+
+        {# Flash messages weergeven #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="flash-{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <main>
+            {% block content %}{% endblock %} {# Hier komt de specifieke pagina-inhoud #}
+        </main>
+
+    </div>
+</body>
+</html> 

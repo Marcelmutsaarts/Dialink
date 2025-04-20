@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Dialink{% endblock %}
+
+{# Macro moet hier gedefinieerd worden, binnen de extends context maar buiten content block #}
+{% macro render_comment(comment, post_id, users) %}
+    <div class="comment">
+        <div class="comment-meta">
+             <span class="comment-author">{{ users.get(comment.user_id, 'Anoniem') }}</span> {# Zoek username op #}
+             {% if comment.original_content != comment.moderated_content %}
+                 <span class="moderated-tag">Dialoog</span>
+             {% endif %}
+             <span>{{ comment.timestamp.strftime('%d-%m-%Y %H:%M') }}</span>
+        </div>
+        <div class="comment-content">{{ comment.moderated_content | nl2br }}</div>
+
+        {# Reply formulier alleen tonen indien ingelogd #}
+        {% if current_user %}
+        <div class="reply-form">
+            <form action="{{ url_for('add_comment', post_id=post_id) }}" method="post">
+                <input type="hidden" name="parent_comment_id" value="{{ comment.id }}">
+                 {# Geen naamveld meer nodig #}
+                 <textarea name="content" placeholder="Reageer op {{ users.get(comment.user_id, 'Anoniem') }}..." rows="1" required></textarea>
+                <button type="submit">Reageer</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {# Render replies recursief #}
+        {% for reply in comment.replies %}
+            {{ render_comment(reply, post_id, users) }} {# Geef users dict door #}
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+
+{% block content %}
+
+    {# Nieuwe post maken - alleen tonen indien ingelogd #}
+    {% if current_user %}
+    <div class="card">
+        <div class="card-header">
+            <h2 class="form-title">Wat wil je delen? 📝</h2>
+        </div>
+        <div class="card-content">
+            <form action="{{ url_for('add_post') }}" method="post" enctype="multipart/form-data">
+                {# Geen naamveld meer nodig #}
+                <textarea name="content" placeholder="Schrijf je bericht..." rows="3" required></textarea>
+                <div>
+                    <label for="image-upload" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; display: block;">Voeg afbeelding toe (optioneel):</label>
+                    <input type="file" name="image" id="image-upload" accept="image/png, image/jpeg, image/gif">
+                </div>
+                <button type="submit" style="margin-top: 16px; width: auto;">Plaatsen</button> {# Button niet full width hier #}
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-content empty-state">
+            <p><a href="{{ url_for('login') }}">Log in</a> of <a href="{{ url_for('register') }}">registreer</a> om een post te plaatsen.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Bestaande posts weergeven #}
+    {% for post in posts %}
+        <div class="card">
+            <div class="card-header">
+                 <h2 class="post-author">{{ users.get(post.user_id, 'Anoniem') }}</h2> {# Zoek username op #}
+                 <div class="post-meta">{{ post.timestamp.strftime('%d-%m-%Y %H:%M') }}</div>
+            </div>
+            <div class="card-content">
+                {% if post.image_filename %}
+                    <img src="{{ url_for('static', filename='uploads/posts/' + post.image_filename) }}" alt="Post afbeelding" style="max-width: 100%; height: auto; border-radius: var(--rounded-md); margin-bottom: 24px;">
+                {% endif %}
+                <div class="post-content">{{ post.content | nl2br }}</div>
+
+                {# Reacties weergeven #}
+                <div class="comments-section">
+                    <h3 class="comments-title">Reacties</h3>
+                    {% for top_level_comment in post.comments %}
+                         {{ render_comment(top_level_comment, post.id, users) }} {# Geef users dict door #}
+                     {% else %}
+                        <p class="empty-state" style="padding: 20px 0;">Nog geen reacties.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Nieuwe TOP-LEVEL reactie toevoegen - alleen tonen indien ingelogd #}
+            {% if current_user %}
+            <div class="card-footer">
+                <h4 class="form-title">Reageer op deze post</h4>
+                <form action="{{ url_for('add_comment', post_id=post.id) }}" method="post">
+                    {# Geen naamveld meer nodig #}
+                    <textarea name="content" placeholder="Schrijf je reactie..." rows="2" required></textarea>
+                    <button type="submit" style="width: auto;">Reageer</button> {# Button niet full width hier #}
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-content empty-state">
+                <p>Er zijn nog geen posts.</p>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %} 
