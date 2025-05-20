@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import os
 import re # Nodig voor nl2br
-from markupsafe import Markup # Correcte import voor Markup
+from markupsafe import Markup, escape # Correcte import voor Markup en escape
 from werkzeug.utils import secure_filename # Nodig voor veilige bestandsnamen
 import uuid # Nodig voor unieke bestandsnamen
 import json
@@ -28,9 +28,10 @@ def allowed_file(filename):
 
 # --- Custom Filter --- 
 def nl2br(value):
-    """Converts newlines in a string to HTML breaks."""
+    """Converts newlines in a string to HTML breaks, escaping HTML content."""
+    escaped_value = escape(value)
     # Gebruik Markup om te zorgen dat de <br> tags niet worden ge-escaped
-    return Markup(re.sub(r'\r\n|\r|\n', '<br>\n', value))
+    return Markup(re.sub(r'\r\n|\r|\n', '<br>\n', escaped_value))
 
 # Registreer het filter bij Jinja
 app.jinja_env.filters['nl2br'] = nl2br
